@@ -72,7 +72,7 @@ jobs:
       #同步rk338的源码    
       - name: Download Source From wiki
         run: |
-          wget -O - http://wiki.friendlyarm.com/download/friendlywrt-rk3328-20200226.7z
+          wget --show-progress http://wiki.friendlyarm.com/download/friendlywrt-rk3328-20200226.7z
           7z x friendlywrt-rk3328-20200226.7z
           cd friendlywrt-rk3328
           repo sync -c --no-clone-bundle
