@@ -20,10 +20,7 @@ on:
   # release:
   #   types: [published]
     
-#环境变量：SSH_ACTIONS设置为true则会在执行完Costom Configure File后显示一个SSH的链接，可用终端或者web登录到vps进行配置
-env:
-  SSH_ACTIONS: true
-  TZ: Asia/Shanghai
+
 
 jobs:
 
@@ -64,6 +61,7 @@ jobs:
             php*
           #安装编译所需要的软件，安装rk3328的编译环境
           sudo -E apt-get update
+          sudo -E apt-get install p7zip
           sudo -E apt-get -y install bc build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex node-uglify gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx-ucl libelf-dev autoconf automake libtool autopoint device-tree-compiler libuv-dev
           sudo -E apt-get -y autoremove --purge
           sudo -E apt-get clean
@@ -72,11 +70,11 @@ jobs:
           sudo cp repo/repo /usr/bin/
           
       #同步rk338的源码    
-      - name: Download Source
+      - name: Download Source From wiki
         run: |
-          mkdir friendlywrt-rk3328
+          wget -O - http://wiki.friendlyarm.com/download/friendlywrt-rk3328-20200226.7z
+          7z x friendlywrt-rk3328-20200226.7z
           cd friendlywrt-rk3328
-          repo init -u https://github.com/friendlyarm/friendlywrt_manifests -b master-v19.07.1 -m rk3328.xml --repo-url=https://github.com/friendlyarm/repo --no-clone-bundle
           repo sync -c --no-clone-bundle
           
               
@@ -106,10 +104,6 @@ jobs:
 #          cd friendlywrt-rk3328/device/friendlyelec/rk3328
 #          sed -i 's/TARGET_FRIENDLYWRT_CONFIG=config_rk3328/TARGET_FRIENDLYWRT_CONFIG=$CONFIG_FILE/' nanopi_r2s.mk
 
-      #如果环境变量设置为true,执行到此步骤时会弹出几行信息，上面有ssh的命令和https的链接，可选择在终端通过ssh链接修改配置或者通过web连接修改
-      - name: SSH connection to Actions
-        uses: P3TERX/debugger-action@master
-        if: env.SSH_ACTIONS == 'true'
 
       #下载预编译文件
       - name: Download package
@@ -121,7 +115,7 @@ jobs:
           find dl -size -1024c -exec rm -f {} \;
 
       #开始编译固件
-      - name: Build OpenWrt
+      - name: Build R2S Original OpenWrt
         run: |
           cd friendlywrt-rk3328
           ./build.sh nanopi_r2s.mk
